@@ -4,47 +4,47 @@ package com.haicover.kata.collections
  * Lớp dữ liệu đại diện cho một sản phẩm.
  *
  * @property id ID định danh duy nhất của sản phẩm.
- * @property name Tên sản phẩm (có thể null).
- * @property price Giá sản phẩm (VND).
- * @property isActive Trạng thái sản phẩm (true nếu đang được bán).
+ * @property name Tên sản phẩm.
+ * @property priceVnd Giá sản phẩm (VND).
+ * @property active Trạng thái sản phẩm (true nếu đang được bán).
  */
 data class Product(
-    val id: Int,
-    val name: String?,
-    val price: Long,
-    val isActive: Boolean,
+    val id: Long,
+    val name: String,
+    val priceVnd: Long,
+    val active: Boolean,
 )
 
 /**
  * Trả về danh sách tên sản phẩm thỏa mãn điều kiện lọc và được chuẩn hóa.
  *
  * Yêu cầu:
- * - Sản phẩm đang hoạt động (isActive == true).
- * - Giá sản phẩm >= minPrice. Nếu minPrice < 0 thì coi như minPrice = 0.
- * - Tên sản phẩm không null, không rỗng và không chỉ chứa khoảng trắng.
+ * - Sản phẩm đang hoạt động (active == true).
+ * - Giá sản phẩm >= minPriceInclusive. Nếu minPriceInclusive < 0 thì coi như minPriceInclusive = 0.
+ * - Tên sản phẩm không rỗng và không chỉ chứa khoảng trắng.
  * - Tên sản phẩm trả về được chuẩn hóa bằng cách trim và chuyển sang chữ hoa (uppercase).
- * - Sắp xếp theo giá giảm dần, nếu trùng giá thì sắp xếp theo tên chuẩn hóa tăng dần.
+ * - Sắp xếp theo giá giảm dần, nếu trùng giá thì sắp xếp theo tên chuẩn hóa tăng dần (case-insensitive),
+ *   nếu vẫn trùng thì sắp xếp theo id tăng dần.
  *
  * @param products Danh sách sản phẩm đầu vào.
- * @param minPrice Mức giá tối thiểu yêu cầu.
+ * @param minPriceInclusive Mức giá tối thiểu yêu cầu (mặc định là 0).
  * @return Danh sách tên sản phẩm thỏa mãn điều kiện và đã được sắp xếp.
  */
 fun activeProductNames(
     products: List<Product>,
-    minPrice: Long,
+    minPriceInclusive: Long = 0,
 ): List<String> {
-    val actualMinPrice = maxOf(0L, minPrice)
-    val filteredAndNormalized = products.filter {
-        it.isActive && it.price >= actualMinPrice && !it.name.isNullOrBlank()
-    }.map {
-        // Lưu cặp giá trị để phục vụ việc sắp xếp
-        Pair(it.price, it.name?.trim()?.uppercase() ?: "")
-    }
-
-    return filteredAndNormalized.sortedWith(
-        compareByDescending<Pair<Long, String>> { it.first }
-            .thenBy { it.second }
-    ).map { it.second }
+    val actualMinPrice = maxOf(0L, minPriceInclusive)
+    return products
+        .filter {
+            it.active && it.priceVnd >= actualMinPrice && !it.name.isBlank()
+        }
+        .sortedWith(
+            compareByDescending<Product> { it.priceVnd }
+                .thenBy(String.CASE_INSENSITIVE_ORDER) { it.name.trim() }
+                .thenBy { it.id }
+        )
+        .map { it.name.trim().uppercase() }
 }
 
 /**
@@ -93,10 +93,18 @@ fun groupCompletedOrderIdsByCustomer(
     }
     return orders
         .filter { it.status == OrderStatus.COMPLETED }
-        .filter { !it.customerId.isNullOrBlank() && !it.id.isBlank() }
+        .mapNotNull { order ->
+            val customerId = order.customerId?.trim()
+            val orderId = order.id.trim()
+            if (customerId.isNullOrBlank() || orderId.isBlank()) {
+                null
+            } else {
+                Pair(customerId, orderId)
+            }
+        }
         .groupBy(
-            keySelector = { it.customerId!!.trim() },
-            valueTransform = { it.id.trim() }
+            keySelector = { it.first },
+            valueTransform = { it.second }
         )
 }
 

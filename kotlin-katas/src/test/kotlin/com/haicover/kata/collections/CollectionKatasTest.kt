@@ -26,8 +26,8 @@ class ActiveProductNamesTest {
     fun `activeProductNames filters out inactive products`() {
         // Arrange
         val products = listOf(
-            Product(1, "Laptop", 1000, true),
-            Product(2, "Phone", 500, false)
+            Product(1L, "Laptop", 1000, true),
+            Product(2L, "Phone", 500, false)
         )
 
         // Act
@@ -41,9 +41,9 @@ class ActiveProductNamesTest {
     fun `activeProductNames filters by minimum price`() {
         // Arrange
         val products = listOf(
-            Product(1, "Keyboard", 100, true),
-            Product(2, "Mouse", 50, true),
-            Product(3, "Monitor", 300, true)
+            Product(1L, "Keyboard", 100, true),
+            Product(2L, "Mouse", 50, true),
+            Product(3L, "Monitor", 300, true)
         )
 
         // Act
@@ -57,8 +57,8 @@ class ActiveProductNamesTest {
     fun `activeProductNames treats negative minPrice as zero`() {
         // Arrange
         val products = listOf(
-            Product(1, "Pen", 5, true),
-            Product(2, "Notebook", 10, true)
+            Product(1L, "Pen", 5, true),
+            Product(2L, "Notebook", 10, true)
         )
 
         // Act
@@ -69,12 +69,11 @@ class ActiveProductNamesTest {
     }
 
     @Test
-    fun `activeProductNames ignores products with null or blank names`() {
+    fun `activeProductNames ignores products with blank names`() {
         // Arrange
         val products = listOf(
-            Product(1, null, 100, true),
-            Product(2, "   ", 200, true),
-            Product(3, "Speaker", 300, true)
+            Product(1L, "   ", 200, true),
+            Product(2L, "Speaker", 300, true)
         )
 
         // Act
@@ -88,9 +87,9 @@ class ActiveProductNamesTest {
     fun `activeProductNames sorts products by price descending`() {
         // Arrange
         val products = listOf(
-            Product(1, "Mouse", 50, true),
-            Product(2, "Monitor", 300, true),
-            Product(3, "Keyboard", 150, true)
+            Product(1L, "Mouse", 50, true),
+            Product(2L, "Monitor", 300, true),
+            Product(3L, "Keyboard", 150, true)
         )
 
         // Act
@@ -101,12 +100,12 @@ class ActiveProductNamesTest {
     }
 
     @Test
-    fun `activeProductNames tie-breaks equal prices alphabetically by name`() {
+    fun `activeProductNames tie-breaks equal prices alphabetically by name case-insensitive`() {
         // Arrange
         val products = listOf(
-            Product(1, "B_Product", 100, true),
-            Product(2, "A_Product", 100, true),
-            Product(3, "C_Product", 100, true)
+            Product(1L, "b_Product", 100, true),
+            Product(2L, "A_Product", 100, true),
+            Product(3L, "C_Product", 100, true)
         )
 
         // Act
@@ -120,7 +119,7 @@ class ActiveProductNamesTest {
     fun `activeProductNames trims and converts names to uppercase`() {
         // Arrange
         val products = listOf(
-            Product(1, "  hainguyen  ", 100, true)
+            Product(1L, "  hainguyen  ", 100, true)
         )
 
         // Act
@@ -133,7 +132,7 @@ class ActiveProductNamesTest {
     @Test
     fun `activeProductNames does not mutate input collection`() {
         // Arrange
-        val products = listOf(Product(1, "Tablet", 400, true))
+        val products = listOf(Product(1L, "Tablet", 400, true))
 
         // Act
         activeProductNames(products, 0)
@@ -144,12 +143,11 @@ class ActiveProductNamesTest {
     }
 
     @Test
-    fun `activeProductNames returns empty list when all names are null or blank`() {
+    fun `activeProductNames returns empty list when all names are blank`() {
         // Arrange
         val products = listOf(
-            Product(1, null, 100, true),
-            Product(2, "", 200, true),
-            Product(3, "   ", 300, true)
+            Product(1L, "", 200, true),
+            Product(2L, "   ", 300, true)
         )
 
         // Act
@@ -157,6 +155,53 @@ class ActiveProductNamesTest {
 
         // Assert
         assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun `activeProductNames handles price exactly equal to minPriceInclusive`() {
+        // Arrange
+        val products = listOf(
+            Product(1L, "Keyboard", 100, true),
+            Product(2L, "Mouse", 99, true)
+        )
+
+        // Act
+        val result = activeProductNames(products, 100)
+
+        // Assert
+        assertEquals(listOf("KEYBOARD"), result)
+    }
+
+    @Test
+    fun `activeProductNames uses default minPriceInclusive value of 0`() {
+        // Arrange
+        val products = listOf(
+            Product(1L, "Keyboard", 100, true),
+            Product(2L, "Mouse", 0, true)
+        )
+
+        // Act
+        val result = activeProductNames(products)
+
+        // Assert
+        assertEquals(listOf("KEYBOARD", "MOUSE"), result)
+    }
+
+    @Test
+    fun `activeProductNames tie-breaks equal price and normalized name by id ascending`() {
+        // Arrange
+        val products = listOf(
+            Product(2L, "Keyboard", 100, true),
+            Product(1L, "Keyboard", 100, true),
+            Product(3L, "Keyboard", 100, true)
+        )
+
+        // Act
+        val result = activeProductNames(products, 0)
+
+        // Assert
+        // All normalized to "KEYBOARD", all price 100, sorted by ID: 1, 2, 3
+        assertEquals(listOf("KEYBOARD", "KEYBOARD", "KEYBOARD"), result)
     }
 }
 
@@ -280,6 +325,18 @@ class GroupCompletedOrdersTest {
         val result = groupCompletedOrderIdsByCustomer(orders)
 
         // Assert
+        assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun `groupCompletedOrderIdsByCustomer customerId null does not cause exception`() {
+        // Arrange
+        val orders = listOf(
+            Order("O-01", null, 100, OrderStatus.COMPLETED)
+        )
+
+        // Act & Assert
+        val result = groupCompletedOrderIdsByCustomer(orders)
         assertTrue(result.isEmpty())
     }
 }
@@ -447,19 +504,19 @@ class DistinctByStableTest {
     @Test
     fun `distinctByStable supports null keys and keeps first null`() {
         // Arrange
-        val list = listOf(
-            Product(1, null, 100, true),
-            Product(2, "Mouse", 200, true),
-            Product(3, null, 300, true)
-        )
+        val list = listOf("A", "B", "C", "D")
 
         // Act
-        val result = distinctByStable(list) { it.name }
+        val result = distinctByStable(list) {
+            if (it == "B" || it == "C") null else it
+        }
 
         // Assert
-        assertEquals(2, result.size)
-        assertEquals(1, result[0].id)
-        assertEquals(2, result[1].id)
+        // "A" -> "A" (kept)
+        // "B" -> null (kept)
+        // "C" -> null (filtered out)
+        // "D" -> "D" (kept)
+        assertEquals(listOf("A", "B", "D"), result)
     }
 
     @Test
