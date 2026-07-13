@@ -1,0 +1,39 @@
+name: Kotlin Katas
+
+on:
+  pull_request:
+    paths:
+      - "kotlin-katas/**"
+      - ".github/workflows/kotlin-katas.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "kotlin-katas/**"
+      - ".github/workflows/kotlin-katas.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Make Gradle Wrapper executable
+        working-directory: kotlin-katas
+        run: chmod +x ./gradlew
+
+      - name: Run tests
+        working-directory: kotlin-katas
+        run: ./gradlew test

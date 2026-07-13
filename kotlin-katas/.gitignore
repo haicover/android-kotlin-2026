@@ -1,0 +1,12 @@
+/.gradle/
+/build/
+local.properties
+*.apk
+*.aab
+*.jks
+*.keystore
+*.pem
+*.p12
+*.key
+/.kotlin/
+/gradle/gradle-daemon-jvm.properties
