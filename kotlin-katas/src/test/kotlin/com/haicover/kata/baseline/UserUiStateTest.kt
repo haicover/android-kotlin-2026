@@ -127,4 +127,26 @@ class UserUiStateTest {
         val m2 = renderMessage(state)
         assertEquals(m1, m2)
     }
+
+    @Test
+    fun `success state copy replaces users without changing original state`() {
+        // Arrange
+        val originalUsers = listOf(
+            User(id = 1L, name = "Hải"),
+        )
+        val replacementUsers = listOf(
+            User(id = 2L, name = "An"),
+            User(id = 3L, name = "Bình"),
+        )
+        val original = UserUiState.Success(originalUsers)
+
+        // Act
+        val copied = original.copy(users = replacementUsers)
+
+        // Assert
+        assertEquals(originalUsers, original.users)
+        assertEquals(replacementUsers, copied.users)
+        assertEquals(1, original.users.size)
+        assertEquals(2, copied.users.size)
+    }
 }
