@@ -78,9 +78,10 @@ fun CounterContent(
         )
         Text(
             modifier = Modifier.padding(top = 16.dp),
-            text = "Số lần bắt đầu: $count",
+            text = "Số lần nhấn: $count",
             fontSize = 18.sp
         )
+
         Button(
             modifier = Modifier.padding(top = 24.dp),
             onClick = onIncrement

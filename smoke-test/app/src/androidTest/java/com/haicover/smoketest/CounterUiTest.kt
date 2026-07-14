@@ -19,7 +19,7 @@ class CounterUiTest {
             CounterRoute()
         }
         // Xác nhận hiển thị counter ban đầu bằng 0
-        composeTestRule.onNodeWithText("Số lần bắt đầu: 0").assertExists()
+        composeTestRule.onNodeWithText("Số lần nhấn: 0").assertExists()
     }
 
     @Test
@@ -34,7 +34,7 @@ class CounterUiTest {
         composeTestRule.onNodeWithText("Bắt đầu hành trình").performClick()
 
         // Xác nhận hiển thị là 3
-        composeTestRule.onNodeWithText("Số lần bắt đầu: 3").assertExists()
+        composeTestRule.onNodeWithText("Số lần nhấn: 3").assertExists()
     }
 
     @Test
@@ -46,7 +46,7 @@ class CounterUiTest {
             )
         }
         // Xác nhận CounterContent(count = 5) hiển thị 5
-        composeTestRule.onNodeWithText("Số lần bắt đầu: 5").assertExists()
+        composeTestRule.onNodeWithText("Số lần nhấn: 5").assertExists()
     }
 
     @OptIn(ExperimentalTestApi::class)
@@ -59,16 +59,16 @@ class CounterUiTest {
         }
 
         // Ban đầu là 0
-        composeTestRule.onNodeWithText("Số lần bắt đầu: 0").assertExists()
+        composeTestRule.onNodeWithText("Số lần nhấn: 0").assertExists()
 
         // Nhấn tăng lên 1
         composeTestRule.onNodeWithText("Bắt đầu hành trình").performClick()
-        composeTestRule.onNodeWithText("Số lần bắt đầu: 1").assertExists()
+        composeTestRule.onNodeWithText("Số lần nhấn: 1").assertExists()
 
         // Giả lập tái tạo trạng thái (Saved Instance State restoration)
         restorationTester.emulateSavedInstanceStateRestore()
 
         // Xác nhận counter được khôi phục về 1
-        composeTestRule.onNodeWithText("Số lần bắt đầu: 1").assertExists()
+        composeTestRule.onNodeWithText("Số lần nhấn: 1").assertExists()
     }
 }
