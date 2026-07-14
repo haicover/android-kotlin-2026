@@ -14,41 +14,59 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.haicover.smoketest.ui.theme.SmokeTestTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SmokeTestApp()
+            SmokeTestTheme {
+                CounterRoute()
+            }
         }
     }
 }
 
+/**
+ * Composable Stateful đóng vai trò định tuyến và quản lý trạng thái của Counter.
+ * Sử dụng rememberSaveable để bảo toàn state qua configuration changes và process death.
+ */
 @Composable
-fun SmokeTestApp() {
-    MaterialTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            SmokeTestScreen()
-        }
+fun CounterRoute() {
+    var count by rememberSaveable {
+        mutableIntStateOf(0)
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        CounterContent(
+            count = count,
+            onIncrement = { count++ }
+        )
     }
 }
 
+/**
+ * Composable Stateless hiển thị giao diện của Counter.
+ * Nhận count dạng dữ liệu bất biến và truyền phát sự kiện qua onIncrement.
+ */
 @Composable
-fun SmokeTestScreen() {
-    var count by remember { mutableIntStateOf(0) }
-
+fun CounterContent(
+    count: Int,
+    onIncrement: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
@@ -65,7 +83,7 @@ fun SmokeTestScreen() {
         )
         Button(
             modifier = Modifier.padding(top = 24.dp),
-            onClick = { count += 1 }
+            onClick = onIncrement
         ) {
             Text("Bắt đầu hành trình")
         }
@@ -74,6 +92,22 @@ fun SmokeTestScreen() {
 
 @Preview(showBackground = true)
 @Composable
-private fun SmokeTestScreenPreview() {
-    SmokeTestApp()
+private fun CounterContentZeroPreview() {
+    SmokeTestTheme {
+        CounterContent(
+            count = 0,
+            onIncrement = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CounterContentFivePreview() {
+    SmokeTestTheme {
+        CounterContent(
+            count = 5,
+            onIncrement = {}
+        )
+    }
 }
